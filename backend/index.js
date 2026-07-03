@@ -27,6 +27,14 @@ app.use("/api/order", require("./routes/orderRoute"));
 app.use("/api/payment",require("./routes/paymentRoute"));
 app.use("/api/analytic",require("./routes/analyticRoute"))
 
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
+});
+
 // server frontend in production
 if(process.env.NODE_ENV == 'production'){
     app.use(express.static(Path2D.join(__dirname,'../frontend/build')));
