@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { clearCart } from '../redux/cartSlice';
-const API_URL = process.env.REACT_APP_API_URL;
+
 const Checkout = () => {
   const { user } = useContext(AuthContext);
   const cartItems = useSelector((state) => state.cart.cartItems);
@@ -18,7 +18,7 @@ const Checkout = () => {
   
   const handlePayment = async () => {
     try {
-      const orderRes = await fetch(`${API_URL}/api/order`, {
+      const orderRes = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: totalPrice })
@@ -43,13 +43,13 @@ const Checkout = () => {
         description: 'Test Transaction',
         order_id: orderData.id,
         handler: async function (response) {
-          const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
+          const verifyRes = await fetch('/api/payment/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(response)
           });
           if (verifyRes.ok) {
-            const saveOrderRes = await fetch(`${API_URL}/api/order`, {
+            const saveOrderRes = await fetch('/api/order', {
               method: 'POST',
               headers: { 
                 'Content-Type': 'application/json',
@@ -90,32 +90,12 @@ const Checkout = () => {
     }
   };
 
-//   const bypassPayment = async () => {
-//     const saveOrderRes = await fetch('/api/orders', {
-//       method: 'POST',
-//       headers: { 
-//         'Content-Type': 'application/json',
-//         Authorization: `Bearer ${user.token}`
-//       },
-//       body: JSON.stringify({
-//         items: cartItems,
-//         totalAmount: totalPrice,
-//         address,
-//         paymentId: 'bypass_txn_' + Date.now()
-//       })
-//     });
-//     if (saveOrderRes.ok) {
-//       dispatch(clearCart());
-//       navigate('/ordersuccess');
-//     }
-//   };
-
-    const bypassPayment = async () => {
+  const bypassPayment = async () => {
     try {
         console.log("Cart Items:", cartItems);
         console.log("First Item:", JSON.stringify(cartItems[0], null, 2));
         const saveOrderRes = await fetch(
-        'http://localhost:4000/api/order',
+        '/api/order',
         {
             method: 'POST',
             headers: {
