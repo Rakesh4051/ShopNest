@@ -62,8 +62,8 @@ const updateProduct = async(req,res) =>{
                 const result = await cloudinary.uploader.upload(req.file.path);
                 product.imageUrl = result.secure_url;
             }
-            const updatedProduct = await Product.save();
-            res.json(updateProduct);
+            const updatedProduct = await product.save();
+            res.json(updatedProduct);
         }
         else{
             res.status(400).json({message:"Product not found"});

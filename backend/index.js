@@ -5,6 +5,8 @@ const path = require("path");
 const connectDB = require("./config/db");
 
 dotenv.config();
+console.log("MONGO_URI =", process.env.MONGO_URI);
+
 connectDB();
 
 const app = express();
@@ -30,7 +32,7 @@ app.use("/api/products", require("./routes/productRoute"));
 app.use("/api/order", require("./routes/orderRoute"));
 app.use("/api/payment", require("./routes/paymentRoute"));
 app.use("/api/analytic", require("./routes/analyticRoute"));
-
+ 
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/build")));
