@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { clearCart } from '../redux/cartSlice';
 
 const Profile = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!user) {
@@ -25,6 +28,7 @@ const Profile = () => {
           // Token obsolete or 401: clear and bounce
           if (res.status === 401) {
              logout();
+             dispatch(clearCart());
              navigate('/login');
           }
           setOrders([]);
@@ -40,6 +44,7 @@ const Profile = () => {
 
   const handleLogout = () => {
     logout();
+    dispatch(clearCart());
     navigate('/login');
   };
 

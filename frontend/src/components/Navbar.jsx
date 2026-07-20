@@ -10,9 +10,11 @@ const Navbar = ()=>{
     const {user, logout} = useContext(AuthContext);
     const cartItems = useSelector((state) => state.cart.cartItems);
     const navigate = useNavigate();
-
+    const dispatch = useDispatch();
+    
     const handleLogout = () => {
         logout();
+        dispatch(clearCart());
         navigate('/login');
     };
 
