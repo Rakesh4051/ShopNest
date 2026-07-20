@@ -6,6 +6,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate} from 'react-router-dom';
 import {useSelector} from 'react-redux';
 import { useDispatch } from 'react-redux';
+import { clearCart } from '../redux/cartSlice';
 
 const Navbar = ()=>{
     const {user, logout} = useContext(AuthContext);
