@@ -27,7 +27,7 @@ const Checkout = () => {
       },
        body: JSON.stringify({ amount: totalPrice }) 
       });
-      
+
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
@@ -41,32 +41,36 @@ const Checkout = () => {
       }
 
       const options = {
-        key: 'rzp_test_dummykey123', // Student dummy fallback
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: 'ShopNest',
-        description: 'Test Transaction',
-        order_id: orderData.id,
-        handler: async function (response) {
-          const verifyRes = await fetch('/api/payment/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(response)
-          });
-          if (verifyRes.ok) {
-            const saveOrderRes = await fetch('/api/order', {
+          key: process.env.REACT_APP_RAZORPAY_KEY_ID,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'ShopNest',
+          description: 'Test Transaction',
+          order_id: orderData.id,
+          handler: async function (response) {
+            const verifyRes = await fetch('/api/payment/verify', {
               method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${user.token}`
-              },
-              body: JSON.stringify({
-                items: cartItems,
-                totalAmount: totalPrice,
-                address,
-                paymentId: response.razorpay_payment_id
-              })
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response)
             });
+            if (verifyRes.ok) {
+              const saveOrderRes = await fetch('/api/order', {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${user.token}`
+                },
+                body: JSON.stringify({
+                  items: cartItems.map(item => ({
+                    productId: item.productId,
+                    qty: item.qty,
+                    price: item.price,
+                  })),
+                  totalAmount: totalPrice,
+                  address,
+                  paymentId: response.razorpay_payment_id
+                })
+          });
 
             if (saveOrderRes.ok) {
               dispatch(clearCart());
