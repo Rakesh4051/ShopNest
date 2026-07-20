@@ -1,13 +1,16 @@
 const Order = require('../model/order');
 const sendEmail = require('../utils/sendEmail');
+const Razorpay = require('razorpay');
 
 const createOrder = async (req, res) => {
   try {
     const { items, totalAmount, address, paymentId } = req.body;
+
     if (items && items.length === 0 || !totalAmount || !address) {
       return res.status(400).json({ message: 'No order items' });
-    } else {
-      const order = await Order.create({
+    }
+    
+      const createdOrder = await Order.create({
         user: req.user._id,
         items,
         totalAmount,
@@ -15,25 +18,23 @@ const createOrder = async (req, res) => {
         paymentId
       });
  
-       const createdOrder = await order.save();
-      // Send Order Confirmation Email
+   // Email is a side effect — never let it fail the order response
+    try {
       const message = `
         <h2>Order Confirmation</h2>
         <p>Hello ${req.user.name},</p>
         <p>Your order has been successfully placed! Order ID: <strong>${createdOrder._id}</strong></p>
-        <p>Total Amount Paid: $${totalAmount.toFixed(2)}</p>
+        <p>Total Amount Paid: ₹${totalAmount.toFixed(2)}</p>
         <p>It will be shipped to: ${address.street}, ${address.city}</p>
         <p>Thank you for shopping with ShopNest!</p>
       `;
-
-      await sendEmail(
-        req.user.email,
-        `ShopNest - Order Confirmation`,
-        message
-      );
-
-      res.status(201).json(createdOrder);
+      await sendEmail(req.user.email, `ShopNest - Order Confirmation`, message);
+    } catch (emailErr) {
+      console.error("Order confirmation email failed:", emailErr.message);
+      // don't return/throw — order already succeeded
     }
+
+    res.status(201).json(createdOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -41,7 +42,7 @@ const createOrder = async (req, res) => {
 
 const myOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id }).populate('items.productId','name Price');
+    const orders = await Order.find({ user: req.user._id }).populate('items.productId','name price');
     res.json(orders);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -73,4 +74,30 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, myOrders, getOrders, updateOrderStatus };
+// RazorPay get way
+
+const Razorpay = require('razorpay');
+
+const razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+const createRazorpayOrder = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!amount) return res.status(400).json({ message: 'Amount is required' });
+
+    const options = {
+      amount: Math.round(amount * 100), // Razorpay expects paise
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+    };
+    const razorpayOrder = await razorpayInstance.orders.create(options);
+    res.status(200).json(razorpayOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createOrder, myOrders, getOrders, updateOrderStatus, createRazorpayOrder };

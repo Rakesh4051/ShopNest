@@ -17,12 +17,17 @@ const Checkout = () => {
   const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.qty, 0);
   
   const handlePayment = async () => {
+    console.log("User:", user);
+    console.log("Token:", user?.token);
     try {
-      const orderRes = await fetch('/api/order', {
+      const orderRes = await fetch('/api/order/create-razorpay-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: totalPrice })
+        headers: { 'Content-Type': 'application/json' ,
+        Authorization:`Bearer ${user.token}`
+      },
+       body: JSON.stringify({ amount: totalPrice }) 
       });
+      
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {

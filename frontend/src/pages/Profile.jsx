@@ -15,7 +15,7 @@ const Profile = () => {
     }
     const fetchMyOrders = async () => {
       try {
-        const res = await fetch('/api/orders/myorders', {
+        const res = await fetch('/api/order/myorders', {
           headers: { Authorization: `Bearer ${user.token}` }
         });
         const data = await res.json();
@@ -79,8 +79,8 @@ const Profile = () => {
               </div>
               <div>
                 <span style={{ 
-                  background: order.status === 'Delivered' ? 'rgba(16,185,129,0.1)' : order.status === 'Shipped' ? 'rgba(59,130,246,0.1)' : 'rgba(245,158,11,0.1)', 
-                  color: order.status === 'Delivered' ? '#10b981' : order.status === 'Shipped' ? '#3b82f6' : '#f59e0b',
+                  background: order.status === 'delivered' ? 'rgba(16,185,129,0.1)' : order.status === 'shipped' ? 'rgba(59,130,246,0.1)' : 'rgba(245,158,11,0.1)', 
+                  color: order.status === 'delivered' ? '#10b981' : order.status === 'shipped' ? '#3b82f6' : '#f59e0b',
                   padding: '8px 16px', borderRadius: '20px', fontWeight: 'bold' 
                 }}>
                   {order.status}
